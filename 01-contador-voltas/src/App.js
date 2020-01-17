@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { ShowTurns } from './components/showTurns';
+import { ShowTimePerTurn } from './components/showTimePerTurn';
+import { Button } from './components/Button';
+import { TurnTable } from './components/turnTable';
+
 import './App.css';
-
-const ShowTurns = (props) => 
-  <p>{props.turns} <br/> voltas</p>
-
-const ShowTimePerTurn = (props) => {
-  const time = props.time;
-  const minutes = parseInt(time / 60, 10);
-  const seconds = time % 60;
-
-  const minutesStr = minutes < 10 ? `0${minutes}` : minutes;
-  const secondsStr = seconds < 10 ? `0${seconds}` : seconds;
-
-  return <p>{minutesStr}:{secondsStr} <br/> tempo da volta</p>
-}
-
-const Button = (props) =>
-  <button onClick={props.onClick}>{props.text}</button>
 
 function App() {
   const [turns, setTurns] = useState({
@@ -29,11 +17,26 @@ function App() {
   const [running, setRunning] = useState(false);
 
   const alterTurns = (operation) => {
+    const newTurns = { ...turns };
+
+    if (operation.substr(0, 1) === '+') {
+      newTurns.turns.push({
+        turn: newTurns.total,
+        time,
+      });
+    }
+
+    if (operation.substr(0, 1) === '-') {
+      newTurns.turns.pop();
+    }
+
     setTurns({
-      ...turns,
+      ...newTurns,
       //eslint-disable-next-line
       total: eval(`${turns.total} ${operation}`)
-    })
+    });
+
+    setTime(0);
   }
 
   useEffect(() => {
@@ -48,24 +51,34 @@ function App() {
         clearInterval(timer)
       }
     }
-
   }, [running]);
 
   const toggleRunning = () => setRunning(!running);
+
+  const restart = () => {
+    setTurns({
+      turns: [],
+      total: 1,
+    });
+
+    setRunning(false);
+
+    setTime(0)
+  }
   
   return (
     <div className="App">
       <ShowTurns turns={turns.total} />
       <p>
-        <Button text='+' onClick={() => alterTurns('+1')} />
-        <Button text='-' onClick={() => alterTurns('-1')} />
+        <Button className="operation" text='+' onClick={() => alterTurns('+1')} />
+        <Button className="operation" text='-' onClick={() => alterTurns('-1')} />
       </p>
       <ShowTimePerTurn time={time} />
       <p>
-        { !running && <Button text='Iniciar' onClick={toggleRunning} /> }
-        { running && <Button text='Pausar' onClick={toggleRunning} /> }
-        <Button text='Reiniciar' />
+        <Button text={running ? 'Pausar' : 'Iniciar' } onClick={toggleRunning} />
+        <Button text='Reiniciar' onClick={restart} />
       </p>
+      <TurnTable data={turns.turns} />
     </div>
   );
 }
