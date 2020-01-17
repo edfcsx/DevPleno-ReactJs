@@ -3,6 +3,7 @@ import { ShowTurns } from './components/showTurns';
 import { ShowTimePerTurn } from './components/showTimePerTurn';
 import { Button } from './components/Button';
 import { TurnTable } from './components/turnTable';
+import { secondsToTime } from './utils/utils';
 
 import './App.css';
 
@@ -22,7 +23,7 @@ function App() {
     if (operation.substr(0, 1) === '+') {
       newTurns.turns.push({
         turn: newTurns.total,
-        time,
+        time: secondsToTime(time),
       });
     }
 
